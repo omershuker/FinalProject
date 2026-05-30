@@ -1,0 +1,14 @@
+replicaCount: 1
+image:
+  repository: omershuker/frontend-service
+  tag: dev-6707a76fdd7d02a1683e00cbffae47802493c7a8
+service:
+  type: NodePort
+  port: 80
+  targetPort: 5000
+  nodePort: 30080 # Accessible outside AWS at http://<EC2-IP>:30080
+env:
+  - name: BOOK_SERVICE_URL
+    value: "http://book-service:5001"
+  - name: REVIEW_SERVICE_URL
+    value: "http://review-service:5002"

@@ -1,0 +1,14 @@
+# Terraform files
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# Python/Flask files
+__pycache__/
+*.pyc
+.env
+venv/
+
+# Local testing files
+docker-compose.override.yaml

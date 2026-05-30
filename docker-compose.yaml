@@ -21,7 +21,7 @@ services:
     build:
       context: ./services/frontend-service
     ports:
-      - "8080:5000" # Accessible locally at http://localhost:8080
+      - "8080:5000"
     environment:
       - BOOK_SERVICE_URL=http://book-service:5001
       - REVIEW_SERVICE_URL=http://review-service:5002

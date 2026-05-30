@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-book-service
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/omershuker/FinalProject.git'
+    targetRevision: dev
+    path: helm/generic-service
+    helm:
+      valueFiles:
+        - ../apps/book-dev.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    createNamespace: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-review-service
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/omershuker/FinalProject.git'
+    targetRevision: dev
+    path: helm/generic-service
+    helm:
+      valueFiles:
+        - ../apps/review-dev.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    createNamespace: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-frontend-service
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/omershuker/FinalProject.git'
+    targetRevision: dev
+    path: helm/generic-service
+    helm:
+      valueFiles:
+        - ../apps/frontend-dev.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    createNamespace: true

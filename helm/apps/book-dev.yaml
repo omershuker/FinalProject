@@ -1,0 +1,8 @@
+replicaCount: 1
+image:
+  repository: omershuker/book-service
+  tag: dev-6707a76fdd7d02a1683e00cbffae47802493c7a8 # Automated by GitHub Actions for dev, or prod-latest for prod
+service:
+  type: ClusterIP
+  port: 5001
+  targetPort: 5001
