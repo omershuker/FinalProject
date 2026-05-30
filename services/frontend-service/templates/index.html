@@ -39,8 +39,8 @@
     .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
     .city-name { font-size: 1.5em; font-weight: bold; }
     .country { color: #aaa; font-size: 0.9em; margin-top: 2px; }
-    .weather-icon { width: 72px; height: 72px; }
-    .temp-main { font-size: 3.5em; font-weight: bold; margin: 8px 0 4px; }
+    .weather-emoji { font-size: 3.5em; line-height: 1; }
+    .temp-main { font-size: 3.5em; font-weight: bold; margin: 10px 0 4px; }
     .description { color: #ccc; font-size: 1em; margin-bottom: 16px; }
     .stats {
       display: flex; gap: 12px;
@@ -56,14 +56,15 @@
       flex: 1; background: rgba(255,255,255,0.05);
       border-radius: 10px; padding: 8px 4px; text-align: center; font-size: 0.78em;
     }
-    .forecast-day img { width: 34px; height: 34px; }
-    .forecast-date { color: #aaa; font-size: 0.75em; margin-bottom: 2px; }
+    .forecast-emoji { font-size: 1.6em; }
+    .forecast-date { color: #aaa; font-size: 0.75em; margin-bottom: 4px; }
     .forecast-temp { font-weight: bold; }
+    .forecast-range { color: #aaa; font-size: 0.75em; }
   </style>
 </head>
 <body>
   <h1>Weather App</h1>
-  <p class="subtitle">Live weather powered by OpenWeatherMap</p>
+  <p class="subtitle">Live weather · Search any city in the world</p>
 
   <form class="search-bar" method="get">
     <input type="text" name="city" placeholder="Search any city..." value="{{ search }}">
@@ -80,12 +81,10 @@
           <div class="city-name">{{ c.city }}</div>
           <div class="country">{{ c.country }}</div>
         </div>
-        <img class="weather-icon"
-          src="https://openweathermap.org/img/wn/{{ c.icon }}@2x.png"
-          alt="{{ c.description }}">
+        <div class="weather-emoji">{{ c.emoji }}</div>
       </div>
       <div class="temp-main">{{ c.temp }}°C</div>
-      <div class="description">{{ c.description }} · Feels like {{ c.feels_like }}°C</div>
+      <div class="description">{{ c.condition }} · Feels like {{ c.feels_like }}°C</div>
       <div class="stats">
         <div class="stat">
           <div class="stat-label">Humidity</div>
@@ -95,10 +94,6 @@
           <div class="stat-label">Wind</div>
           <div class="stat-value">{{ c.wind }} km/h</div>
         </div>
-        <div class="stat">
-          <div class="stat-label">Condition</div>
-          <div class="stat-value">{{ c.condition }}</div>
-        </div>
       </div>
       {% if c.forecast %}
       <div class="forecast-title">5-Day Forecast</div>
@@ -106,8 +101,9 @@
         {% for f in c.forecast %}
         <div class="forecast-day">
           <div class="forecast-date">{{ f.date[5:] }}</div>
-          <img src="https://openweathermap.org/img/wn/{{ f.icon }}.png" alt="{{ f.condition }}">
-          <div class="forecast-temp">{{ f.temp }}°C</div>
+          <div class="forecast-emoji">{{ f.emoji }}</div>
+          <div class="forecast-temp">{{ f.temp_max }}°</div>
+          <div class="forecast-range">{{ f.temp_min }}°</div>
         </div>
         {% endfor %}
       </div>

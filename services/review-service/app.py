@@ -1,12 +1,18 @@
-import os
 import requests
 from flask import Flask, jsonify, request
-from collections import defaultdict
 
 app = Flask(__name__)
 
-API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
-OWM_URL = "https://api.openweathermap.org/data/2.5/forecast"
+def condition_emoji(desc):
+    d = desc.lower()
+    if any(w in d for w in ["sunny", "clear"]): return "☀️"
+    if any(w in d for w in ["partly", "partial"]): return "⛅"
+    if any(w in d for w in ["overcast", "cloudy", "cloud"]): return "☁️"
+    if any(w in d for w in ["thunder", "storm"]): return "⛈️"
+    if any(w in d for w in ["snow", "sleet", "blizzard"]): return "❄️"
+    if any(w in d for w in ["rain", "drizzle", "shower"]): return "🌧️"
+    if any(w in d for w in ["mist", "fog", "haze"]): return "🌫️"
+    return "🌤️"
 
 @app.route('/forecast', methods=['GET'])
 def get_forecast():
@@ -14,29 +20,25 @@ def get_forecast():
     if not city:
         return jsonify({"error": "city parameter required"}), 400
 
-    resp = requests.get(OWM_URL, params={
-        "q": city, "appid": API_KEY, "units": "metric", "cnt": 40
-    }, timeout=5)
-
+    resp = requests.get(
+        f"https://wttr.in/{city}?format=j1",
+        headers={"User-Agent": "weather-app/1.0"},
+        timeout=5
+    )
     if resp.status_code != 200:
         return jsonify({"error": "City not found"}), 404
 
-    daily = defaultdict(list)
-    for item in resp.json()["list"]:
-        date = item["dt_txt"].split(" ")[0]
-        daily[date].append(item)
-
     forecast = []
-    for date, items in list(daily.items())[:5]:
-        noon = min(items, key=lambda x: abs(int(x["dt_txt"].split(" ")[1][:2]) - 12))
+    for day in resp.json().get("weather", [])[:5]:
+        hourly = day.get("hourly", [])
+        noon = hourly[min(4, len(hourly) - 1)] if hourly else {}
+        desc = noon.get("weatherDesc", [{}])[0].get("value", "Unknown")
         forecast.append({
-            "date": date,
-            "temp": round(noon["main"]["temp"]),
-            "condition": noon["weather"][0]["main"],
-            "description": noon["weather"][0]["description"].capitalize(),
-            "icon": noon["weather"][0]["icon"],
-            "humidity": noon["main"]["humidity"],
-            "wind": round(noon["wind"]["speed"] * 3.6),
+            "date": day["date"],
+            "temp_max": int(day["maxtempC"]),
+            "temp_min": int(day["mintempC"]),
+            "condition": desc,
+            "emoji": condition_emoji(desc),
         })
 
     return jsonify(forecast)

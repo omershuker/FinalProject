@@ -6,8 +6,6 @@ services:
       context: ./services/book-service
     ports:
       - "5001:5001"
-    environment:
-      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
     networks:
       - platform-network
 
@@ -16,8 +14,6 @@ services:
       context: ./services/review-service
     ports:
       - "5002:5002"
-    environment:
-      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
     networks:
       - platform-network
 
