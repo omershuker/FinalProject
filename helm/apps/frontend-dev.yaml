@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: omershuker/frontend-service
-  tag: dev-083b1123e5d12f14ff95789a047dbb23547f008e
+  tag: dev-f67763a1178b300f255baaf23a4f8a008803f856
 service:
   type: NodePort
   port: 80
