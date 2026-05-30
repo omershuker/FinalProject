@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: omershuker/review-service
-  tag: dev-1fad2ead97ce2464d351e9ae362ec6d7adc635ae # Automated by GitHub Actions for dev, or prod-latest for prod
+  tag: dev-6707a76fdd7d02a1683e00cbffae47802493c7a8 # Automated by GitHub Actions for dev, or prod-latest for prod
 service:
   type: ClusterIP
   port: 5002
