@@ -1,22 +1,47 @@
-from flask import Flask, jsonify
+import os
+import requests
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-cities = [
-    {"id": 1, "city": "Tel Aviv", "country": "Israel", "temp": 28, "condition": "Sunny", "humidity": 65, "wind": 12},
-    {"id": 2, "city": "New York", "country": "USA", "temp": 22, "condition": "Partly Cloudy", "humidity": 70, "wind": 15},
-    {"id": 3, "city": "London", "country": "UK", "temp": 15, "condition": "Rainy", "humidity": 85, "wind": 20},
-    {"id": 4, "city": "Tokyo", "country": "Japan", "temp": 25, "condition": "Clear", "humidity": 60, "wind": 8},
-]
+API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
+OWM_URL = "https://api.openweathermap.org/data/2.5/weather"
+DEFAULT_CITIES = ["Tel Aviv", "New York", "London", "Tokyo", "Paris"]
+
+def fetch_weather(city):
+    resp = requests.get(OWM_URL, params={
+        "q": city, "appid": API_KEY, "units": "metric"
+    }, timeout=5)
+    resp.raise_for_status()
+    d = resp.json()
+    return {
+        "id": d["id"],
+        "city": d["name"],
+        "country": d["sys"]["country"],
+        "temp": round(d["main"]["temp"]),
+        "feels_like": round(d["main"]["feels_like"]),
+        "condition": d["weather"][0]["main"],
+        "description": d["weather"][0]["description"].capitalize(),
+        "icon": d["weather"][0]["icon"],
+        "humidity": d["main"]["humidity"],
+        "wind": round(d["wind"]["speed"] * 3.6),
+    }
 
 @app.route('/weather', methods=['GET'])
 def get_weather():
-    return jsonify(cities)
-
-@app.route('/weather/<int:city_id>', methods=['GET'])
-def get_city_weather(city_id):
-    city = next((c for c in cities if c['id'] == city_id), None)
-    return jsonify(city) if city else (jsonify({"error": "Not found"}), 404)
+    city = request.args.get('city')
+    if city:
+        try:
+            return jsonify(fetch_weather(city))
+        except requests.HTTPError:
+            return jsonify({"error": f"City '{city}' not found"}), 404
+    results = []
+    for c in DEFAULT_CITIES:
+        try:
+            results.append(fetch_weather(c))
+        except Exception:
+            pass
+    return jsonify(results)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)

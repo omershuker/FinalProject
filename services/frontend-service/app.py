@@ -1,5 +1,6 @@
-from flask import Flask, render_template
-import os, requests
+import os
+import requests
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -8,17 +9,32 @@ FORECAST_SERVICE_URL = os.getenv("REVIEW_SERVICE_URL", "http://review-service:50
 
 @app.route('/')
 def index():
+    search = request.args.get('city', '').strip()
     cities = []
+    error = None
+
     try:
-        cities = requests.get(f"{WEATHER_SERVICE_URL}/weather", timeout=2).json()
-        for c in cities:
-            c['forecast'] = requests.get(
-                f"{FORECAST_SERVICE_URL}/forecast?city_id={c['id']}", timeout=2
-            ).json()
+        if search:
+            resp = requests.get(f"{WEATHER_SERVICE_URL}/weather",
+                                params={"city": search}, timeout=5)
+            if resp.status_code == 404:
+                error = f"City '{search}' not found."
+            else:
+                city = resp.json()
+                forecast_resp = requests.get(f"{FORECAST_SERVICE_URL}/forecast",
+                                             params={"city": city['city']}, timeout=5)
+                city['forecast'] = forecast_resp.json() if forecast_resp.ok else []
+                cities = [city]
+        else:
+            cities = requests.get(f"{WEATHER_SERVICE_URL}/weather", timeout=10).json()
+            for c in cities:
+                forecast_resp = requests.get(f"{FORECAST_SERVICE_URL}/forecast",
+                                             params={"city": c['city']}, timeout=5)
+                c['forecast'] = forecast_resp.json() if forecast_resp.ok else []
     except Exception as e:
-        cities = [{"id": 0, "city": f"Connection Error: {str(e)}", "country": "",
-                   "temp": 0, "condition": "Error", "humidity": 0, "wind": 0, "forecast": []}]
-    return render_template('index.html', cities=cities)
+        error = f"Service error: {str(e)}"
+
+    return render_template('index.html', cities=cities, search=search, error=error)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

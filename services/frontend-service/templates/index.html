@@ -2,48 +2,118 @@
 <html>
 <head>
   <title>Weather App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #87CEEB; }
-    h1 { color: #1a1a2e; }
-    .city-card {
-      background: white;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      max-width: 500px;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: white;
+      padding: 40px 20px;
     }
-    .temp { font-size: 2em; font-weight: bold; color: #e74c3c; }
-    .condition { font-size: 1.2em; color: #7f8c8d; margin-top: 4px; }
-    .details { margin-top: 10px; color: #555; }
-    .forecast { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-    .forecast h4 { color: #2c3e50; margin-bottom: 8px; }
-    .forecast-item { display: inline-block; margin-right: 20px; text-align: center; }
+    h1 { text-align: center; font-size: 2.5em; margin-bottom: 6px; }
+    .subtitle { text-align: center; color: #aaa; margin-bottom: 30px; font-size: 0.95em; }
+    .search-bar { display: flex; justify-content: center; margin-bottom: 40px; }
+    .search-bar input {
+      width: 320px; padding: 12px 20px;
+      border-radius: 25px 0 0 25px; border: none;
+      font-size: 1em; outline: none;
+      background: rgba(255,255,255,0.12); color: white;
+    }
+    .search-bar input::placeholder { color: #aaa; }
+    .search-bar button {
+      padding: 12px 24px; border-radius: 0 25px 25px 0;
+      border: none; background: #e94560; color: white;
+      font-size: 1em; cursor: pointer;
+    }
+    .search-bar button:hover { background: #c73652; }
+    .error { text-align: center; color: #e94560; margin-bottom: 20px; font-size: 1.1em; }
+    .grid { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; max-width: 1200px; margin: 0 auto; }
+    .card {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 24px; width: 340px;
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .city-name { font-size: 1.5em; font-weight: bold; }
+    .country { color: #aaa; font-size: 0.9em; margin-top: 2px; }
+    .weather-icon { width: 72px; height: 72px; }
+    .temp-main { font-size: 3.5em; font-weight: bold; margin: 8px 0 4px; }
+    .description { color: #ccc; font-size: 1em; margin-bottom: 16px; }
+    .stats {
+      display: flex; gap: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px; padding: 12px; margin-bottom: 16px;
+    }
+    .stat { flex: 1; text-align: center; }
+    .stat-label { color: #aaa; font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-weight: bold; margin-top: 3px; }
+    .forecast-title { color: #aaa; font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .forecast-list { display: flex; gap: 6px; }
+    .forecast-day {
+      flex: 1; background: rgba(255,255,255,0.05);
+      border-radius: 10px; padding: 8px 4px; text-align: center; font-size: 0.78em;
+    }
+    .forecast-day img { width: 34px; height: 34px; }
+    .forecast-date { color: #aaa; font-size: 0.75em; margin-bottom: 2px; }
+    .forecast-temp { font-weight: bold; }
   </style>
 </head>
 <body>
   <h1>Weather App</h1>
-  {% for city in cities %}
-  <div class="city-card">
-    <h2>{{ city.city }}, {{ city.country }}</h2>
-    <div class="temp">{{ city.temp }}°C</div>
-    <div class="condition">{{ city.condition }}</div>
-    <div class="details">
-      Humidity: {{ city.humidity }}% &nbsp;|&nbsp; Wind: {{ city.wind }} km/h
-    </div>
-    {% if city.forecast %}
-    <div class="forecast">
-      <h4>Forecast:</h4>
-      {% for f in city.forecast %}
-      <div class="forecast-item">
-        <div>{{ f.day }}</div>
-        <div><strong>{{ f.temp }}°C</strong></div>
-        <div>{{ f.condition }}</div>
+  <p class="subtitle">Live weather powered by OpenWeatherMap</p>
+
+  <form class="search-bar" method="get">
+    <input type="text" name="city" placeholder="Search any city..." value="{{ search }}">
+    <button type="submit">Search</button>
+  </form>
+
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+  <div class="grid">
+    {% for c in cities %}
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="city-name">{{ c.city }}</div>
+          <div class="country">{{ c.country }}</div>
+        </div>
+        <img class="weather-icon"
+          src="https://openweathermap.org/img/wn/{{ c.icon }}@2x.png"
+          alt="{{ c.description }}">
       </div>
-      {% endfor %}
+      <div class="temp-main">{{ c.temp }}°C</div>
+      <div class="description">{{ c.description }} · Feels like {{ c.feels_like }}°C</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Humidity</div>
+          <div class="stat-value">{{ c.humidity }}%</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Wind</div>
+          <div class="stat-value">{{ c.wind }} km/h</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Condition</div>
+          <div class="stat-value">{{ c.condition }}</div>
+        </div>
+      </div>
+      {% if c.forecast %}
+      <div class="forecast-title">5-Day Forecast</div>
+      <div class="forecast-list">
+        {% for f in c.forecast %}
+        <div class="forecast-day">
+          <div class="forecast-date">{{ f.date[5:] }}</div>
+          <img src="https://openweathermap.org/img/wn/{{ f.icon }}.png" alt="{{ f.condition }}">
+          <div class="forecast-temp">{{ f.temp }}°C</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
-    {% endif %}
+    {% endfor %}
   </div>
-  {% endfor %}
 </body>
 </html>
