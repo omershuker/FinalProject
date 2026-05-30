@@ -1,0 +1,8 @@
+replicaCount: 1
+image:
+  repository: omershuker/review-service
+  tag: dev-latest # Automated by GitHub Actions for dev, or prod-latest for prod
+service:
+  type: ClusterIP
+  port: 5002
+  targetPort: 5002
