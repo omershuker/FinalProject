@@ -3,7 +3,6 @@ name: Deploy Development
 on:
   push:
     branches: [ "dev" ]
-    paths: [ "services/**" ]
 
 jobs:
   build-and-push:
