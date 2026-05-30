@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Weather App</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #87CEEB; }
+    h1 { color: #1a1a2e; }
+    .city-card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      max-width: 500px;
+    }
+    .temp { font-size: 2em; font-weight: bold; color: #e74c3c; }
+    .condition { font-size: 1.2em; color: #7f8c8d; margin-top: 4px; }
+    .details { margin-top: 10px; color: #555; }
+    .forecast { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
+    .forecast h4 { color: #2c3e50; margin-bottom: 8px; }
+    .forecast-item { display: inline-block; margin-right: 20px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>Weather App</h1>
+  {% for city in cities %}
+  <div class="city-card">
+    <h2>{{ city.city }}, {{ city.country }}</h2>
+    <div class="temp">{{ city.temp }}°C</div>
+    <div class="condition">{{ city.condition }}</div>
+    <div class="details">
+      Humidity: {{ city.humidity }}% &nbsp;|&nbsp; Wind: {{ city.wind }} km/h
+    </div>
+    {% if city.forecast %}
+    <div class="forecast">
+      <h4>Forecast:</h4>
+      {% for f in city.forecast %}
+      <div class="forecast-item">
+        <div>{{ f.day }}</div>
+        <div><strong>{{ f.temp }}°C</strong></div>
+        <div>{{ f.condition }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</body>
+</html>
